@@ -32,4 +32,6 @@ fn find_files(path: PathBuf) -> Result<Vec<DirEntry>, &'static str> {
     Ok(matches)
 }
 
-fn read_file(path: PathBuf) ->
+fn read_file(path: PathBuf) {
+
+}
