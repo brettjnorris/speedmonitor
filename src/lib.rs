@@ -31,23 +31,13 @@ pub struct Measurement {
 
 impl Measurement {
     pub fn from_csv(record: StringRecord) -> Result<Measurement, Box<dyn Error>> {
-        let time = Utc::now();
-        let server = record[0].to_string();
-        let ping = record[2].to_string().parse::<f32>().unwrap();
-        let download_rate = record[5].to_string().parse::<u32>().unwrap();
-        let upload_rate = record[6].to_string().parse::<u32>().unwrap();
-
-        let measurement = Measurement {
-            time,
-            server,
-            ping,
-            download_rate,
-            upload_rate,
-        };
-
-        println!("{:?}", measurement);
-
-        Ok(measurement)
+        Ok(Measurement {
+            time: Utc::now(),
+            server: record[0].to_string(),
+            ping: record[2].to_string().parse::<f32>().unwrap(),
+            download_rate: record[5].to_string().parse::<u32>().unwrap(),
+            upload_rate: record[6].to_string().parse::<u32>().unwrap(),
+        })
     }
 }
 
