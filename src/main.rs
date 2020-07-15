@@ -1,7 +1,10 @@
 use std::env;
+use std::path::PathBuf;
+
+use speedmonitor::Config;
 
 fn main() {
-    let current_dir = env::current_dir().unwrap();
-    speedmonitor::process(current_dir)
+    let config = Config::new();
+    speedmonitor::process(PathBuf::from(config.ingest_dir))
 }
 

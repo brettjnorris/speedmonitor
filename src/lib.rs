@@ -21,8 +21,9 @@ pub struct Measurement {
 }
 
 pub struct Config {
-    influxdb_host: String,
-    influxdb_database: String
+    pub influxdb_host: String,
+    pub influxdb_database: String,
+    pub ingest_dir: String
 }
 
 impl Config {
@@ -37,7 +38,12 @@ impl Config {
             Err(_e) => String::from("speedmonitor")
         };
 
-        Config { influxdb_host, influxdb_database }
+        let ingest_dir = match env::var("INGEST_DIR") {
+            Ok(val) => val,
+            Err(_e) => String::from("./")
+        };
+
+        Config { influxdb_host, influxdb_database, ingest_dir }
     }
 }
 
