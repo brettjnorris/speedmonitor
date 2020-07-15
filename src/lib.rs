@@ -1,23 +1,14 @@
 use std::{fs};
 use std::path::{PathBuf};
 use std::error::Error;
+use std::env;
 
 use csv::{StringRecord, ReaderBuilder};
-use influxdb::{Client, Query, Timestamp};
+use influxdb::{Client, Query};
 use influxdb::InfluxDbWriteable;
 use chrono::{DateTime, Utc};
-use futures::executor::block_on;
 
 use tokio::runtime::Runtime;
-
-pub fn process(dir: PathBuf) {
-    let query = String::from(".csv");
-    let files = find_files(dir, query).unwrap();
-
-    for file in files {
-        parse_contents(file).unwrap();
-    }
-}
 
 #[derive(Clone, Debug)]
 #[derive(InfluxDbWriteable)]
@@ -27,6 +18,36 @@ pub struct Measurement {
     download_rate: u32,
     upload_rate: u32,
     #[tag] server: String
+}
+
+pub struct Config {
+    influxdb_host: String,
+    influxdb_database: String
+}
+
+impl Config {
+    pub fn new() -> Config {
+        let influxdb_host = match env::var("INFLUXDB_HOST") {
+            Ok(val) => val,
+            Err(_e) => String::from("http://localhost:8086")
+        };
+
+        let influxdb_database = match env::var("INFLUXDB_DATABASE") {
+            Ok(val) => val,
+            Err(_e) => String::from("speedmonitor")
+        };
+
+        Config { influxdb_host, influxdb_database }
+    }
+}
+
+pub fn process(dir: PathBuf) {
+    let query = String::from(".csv");
+    let files = find_files(dir, query).unwrap();
+
+    for file in files {
+        parse_contents(file).unwrap();
+    }
 }
 
 impl Measurement {
@@ -80,7 +101,8 @@ fn parse_contents(path: String) -> Result<Vec<Measurement>, Box<dyn Error>> {
 }
 
 async fn write_measurement(measurement: Measurement) {
-    let client = Client::new("http://localhost:8086", "speedmonitor");
+    let config = Config::new();
+    let client = Client::new(config.influxdb_host, config.influxdb_database);
 
     let write_result = client.query(&measurement.into_query("rates")).await;
     assert!(write_result.is_ok(), "Write result was not okay");
