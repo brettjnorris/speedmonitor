@@ -21,7 +21,7 @@ pub fn process(dir: PathBuf) {
 
     for file in files {
         match parse_contents(file) {
-            Ok(result) => println!("file processed"),
+            Ok(_result) => println!("file processed"),
             Err(e) => println!("Error processing file: {}", e)
         }
     }

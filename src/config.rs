@@ -3,7 +3,8 @@ use std::env;
 pub struct Config {
     pub influxdb_host: String,
     pub influxdb_database: String,
-    pub ingest_dir: String
+    pub ingest_dir: String,
+    pub sleep_mins: u64
 }
 
 impl Config {
@@ -23,6 +24,11 @@ impl Config {
             Err(_e) => String::from("./")
         };
 
-        Config { influxdb_host, influxdb_database, ingest_dir }
+        let sleep_mins = match env::var("SLEEP_MINS") {
+            Ok(val) => val.parse::<u64>().unwrap(),
+            Err(_e) => 15 * 60
+        };
+
+        Config { influxdb_host, influxdb_database, ingest_dir, sleep_mins }
     }
 }
