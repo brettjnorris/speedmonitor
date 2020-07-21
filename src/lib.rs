@@ -20,7 +20,10 @@ pub fn process(dir: PathBuf) {
     println!("{:?}", files);
 
     for file in files {
-        parse_contents(file).unwrap();
+        match parse_contents(file) {
+            Ok(result) => println!("file processed"),
+            Err(e) => println!("Error processing file: {}", e)
+        }
     }
 }
 
