@@ -17,6 +17,8 @@ pub fn process(dir: PathBuf) {
     let query = String::from(".csv");
     let files = find_files(dir, query).unwrap();
 
+    println!("{:?}", files);
+
     for file in files {
         parse_contents(file).unwrap();
     }
@@ -53,7 +55,7 @@ fn parse_contents(path: String) -> Result<Vec<Measurement>, Box<dyn Error>> {
             .expect("Failed to create tokio runtime")
             .block_on(write_measurement(measurement.clone()));
 
-        remove_file(path.clone());
+        remove_file(path.clone()).unwrap();
         measurements.push(measurement);
     }
 
