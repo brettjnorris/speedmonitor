@@ -1,7 +1,7 @@
-use std::env;
 use std::path::PathBuf;
 
-use speedmonitor::Config;
+mod config;
+use config::Config;
 
 fn main() {
     let config = Config::new();
