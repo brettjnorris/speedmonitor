@@ -1,5 +1,5 @@
 use std::{fs};
-use std::path::{PathBuf};
+use std::path::{Path, PathBuf};
 use std::error::Error;
 
 use csv::ReaderBuilder;
@@ -43,7 +43,7 @@ fn find_files(path: PathBuf, query: String) -> Result<Vec<String>, Box<dyn Error
 
 fn parse_contents(path: String) -> Result<Vec<Measurement>, Box<dyn Error>> {
     let mut measurements = vec![];
-    let mut rdr = ReaderBuilder::new().has_headers(false).from_path(path)?;
+    let mut rdr = ReaderBuilder::new().has_headers(false).from_path(&path)?;
 
     for result in rdr.records() {
         let record = result?;
@@ -53,6 +53,7 @@ fn parse_contents(path: String) -> Result<Vec<Measurement>, Box<dyn Error>> {
             .expect("Failed to create tokio runtime")
             .block_on(write_measurement(measurement.clone()));
 
+        remove_file(path.clone());
         measurements.push(measurement);
     }
 
@@ -69,5 +70,19 @@ async fn write_measurement(measurement: Measurement) {
     let read_query = Query::raw_read_query("SELECT * FROM rates");
     let read_result = client.query(&read_query).await;
     assert!(read_result.is_ok(), "Read result was not okay");
-    println!("{}", read_result.unwrap());
+}
+
+fn remove_file(path_string: String) -> Result<String, Box<dyn Error>> {
+    let path = Path::new(&path_string);
+    let file_name = path.file_name().unwrap();
+
+    let new_path = path
+        .parent()
+        .unwrap()
+        .join("processed")
+        .join(file_name);
+
+    fs::rename(path_string, new_path).unwrap();
+
+    Ok(String::from("file deleted"))
 }
